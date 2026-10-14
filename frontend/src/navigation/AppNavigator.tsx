@@ -17,20 +17,6 @@ import { useAppStore } from '../stores/useAppStore';
 // Metro will automatically resolve to LandingPage.web.tsx on web, LandingPage.tsx on native
 import LandingPage from '../screens/LandingPage';
 
-// Web-specific page imports (only used on web)
-const PrivacyPageWeb = Platform.OS === 'web'
-  ? require('../screens/PrivacyPage.web').default
-  : null;
-const TermsPageWeb = Platform.OS === 'web'
-  ? require('../screens/TermsPage.web').default
-  : null;
-const SupportPageWeb = Platform.OS === 'web'
-  ? require('../screens/SupportPage.web').default
-  : null;
-const DownloadsPageWeb = Platform.OS === 'web'
-  ? require('../screens/DownloadsPage.web').default
-  : null;
-
 export type RootTabParamList = {
   Map: { focusRvmId?: number; focusLat?: number; focusLng?: number } | undefined;
   Favorites: undefined;
@@ -69,23 +55,6 @@ export function AppNavigator() {
   const hasSeenOnboarding = useAppStore((s) => s.hasSeenOnboarding);
 
   if (Platform.OS === 'web') {
-    // Handle URL-based routing on web for legal pages
-    const raw = typeof window !== 'undefined' ? window.location.pathname : '/';
-    const pathname = raw.replace(/\/+$/, '') || '/';
-
-    if (pathname === '/privacy' && PrivacyPageWeb) {
-      return <PrivacyPageWeb />;
-    }
-    if (pathname === '/terms' && TermsPageWeb) {
-      return <TermsPageWeb />;
-    }
-    if (pathname === '/support' && SupportPageWeb) {
-      return <SupportPageWeb />;
-    }
-    if (pathname === '/downloads' && DownloadsPageWeb) {
-      return <DownloadsPageWeb />;
-    }
-
     return <LandingPage />;
   }
 
