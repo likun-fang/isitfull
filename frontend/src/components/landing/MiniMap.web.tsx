@@ -56,8 +56,7 @@ export function MiniMap({ location, rvms }: Props) {
           background: transparent;
           border: none;
         }
-        .minimap-container .leaflet-control-zoom,
-        .minimap-container .leaflet-control-attribution {
+        .minimap-container .leaflet-control-zoom {
           display: none;
         }
       `}</style>
@@ -71,10 +70,13 @@ export function MiniMap({ location, rvms }: Props) {
         doubleClickZoom={false}
         touchZoom={false}
         keyboard={false}
-        attributionControl={false}
         className="minimap-container"
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {/* The OpenStreetMap tile usage policy requires this credit. */}
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
         <CircleMarker
           center={center}

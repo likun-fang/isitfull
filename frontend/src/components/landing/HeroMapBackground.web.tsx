@@ -29,8 +29,7 @@ export function HeroMapBackground({ rvms }: Props) {
   return (
     <div style={styles.wrapper}>
       <style>{`
-        .hero-bg-map .leaflet-control-zoom,
-        .hero-bg-map .leaflet-control-attribution {
+        .hero-bg-map .leaflet-control-zoom {
           display: none;
         }
         .hero-bg-map {
@@ -52,7 +51,7 @@ export function HeroMapBackground({ rvms }: Props) {
           attributionControl={false}
           className="hero-bg-map"
         >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {rvms?.map((rvm) => (
             <CircleMarker
               key={rvm.id}
@@ -71,6 +70,10 @@ export function HeroMapBackground({ rvms }: Props) {
       </div>
       {/* Dark overlay on top */}
       <div style={styles.overlay} />
+      {/* The OpenStreetMap tile usage policy requires this credit. */}
+      <div style={styles.attribution}>
+        &copy; <a href="https://www.openstreetmap.org/copyright" style={styles.attributionLink}>OpenStreetMap</a> contributors
+      </div>
     </div>
   );
 }
@@ -104,5 +107,22 @@ const styles: Record<string, React.CSSProperties> = {
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.28)',
     pointerEvents: 'none',
+  },
+  // Outside the blurred map, so it copies the look of Leaflet's attribution control.
+  // Top right because the hero card reaches the bottom of short screens.
+  attribution: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: '0 5px',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    color: '#333',
+    fontFamily: '"Helvetica Neue", Arial, Helvetica, sans-serif',
+    fontSize: 12,
+    lineHeight: 1.4,
+  },
+  attributionLink: {
+    color: '#0078A8',
+    textDecoration: 'none',
   },
 };
