@@ -44,3 +44,6 @@ yarn-error.*
 # generated native folders
 /android
 /ios
+
+# Written into dist/ by scripts/generate-city-pages.mjs on every web build
+/public/sitemap.xml
