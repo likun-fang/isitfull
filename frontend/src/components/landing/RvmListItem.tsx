@@ -85,6 +85,7 @@ export function RvmListItem({ rvm, onReport }: Props) {
   const [selectedReason, setSelectedReason] = useState<IssueReason | null>(null);
   const [issueSubmitting, setIssueSubmitting] = useState(false);
   const [issueResult, setIssueResult] = useState<string | null>(null);
+  const [issueError, setIssueError] = useState<string | null>(null);
 
   const brand = getBrand(rvm.name);
   const status = STATUS_STYLES[rvm.status] || STATUS_STYLES.UNKNOWN;
@@ -106,6 +107,7 @@ export function RvmListItem({ rvm, onReport }: Props) {
   const handleIssueSubmit = async () => {
     if (!selectedReason) return;
     setIssueSubmitting(true);
+    setIssueError(null);
     try {
       const message = await rvmService.reportIssue(rvm.id, selectedReason);
       setIssueResult(message);
@@ -116,7 +118,7 @@ export function RvmListItem({ rvm, onReport }: Props) {
       }, 2000);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Failed to submit';
-      setIssueResult(msg);
+      setIssueError(msg);
     } finally {
       setIssueSubmitting(false);
     }
@@ -262,10 +264,16 @@ export function RvmListItem({ rvm, onReport }: Props) {
                   </Text>
                 </TouchableOpacity>
               ))}
+              {issueError && (
+                <View style={styles.issueError}>
+                  <Icon name="alert-triangle" size={14} color={theme.colors.error} />
+                  <Text style={styles.issueErrorText}>{issueError}</Text>
+                </View>
+              )}
               <View style={styles.issueActions}>
                 <TouchableOpacity
                   style={styles.issueCancelButton}
-                  onPress={() => { setShowIssueForm(false); setSelectedReason(null); }}
+                  onPress={() => { setShowIssueForm(false); setSelectedReason(null); setIssueError(null); }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.issueCancelText}>Cancel</Text>
@@ -454,6 +462,18 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   issueResultText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.neutral[600],
+    fontWeight: '500',
+  },
+  issueError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: theme.spacing.sm,
+    gap: 6,
+  },
+  issueErrorText: {
+    flexShrink: 1,
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.neutral[600],
     fontWeight: '500',
