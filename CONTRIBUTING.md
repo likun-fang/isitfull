@@ -11,7 +11,7 @@
 | `admin-panel/` | Next.js admin panel |
 | `docker-compose.yml` | PostgreSQL and Redis for local development, plus an optional `backend` service |
 | `deploy/` | Production Compose file, Caddy config, backup script and the [deployment guide](deploy/README.md) |
-| `.github/workflows/` | Builds and deploys the backend when `backend/` changes on `main` |
+| `.github/workflows/` | Checks changed components on pull requests and `main`, and deploys backend changes on `main` |
 
 ## Branches
 
@@ -25,12 +25,14 @@ Use Conventional Commits: `<type>: <description>`, e.g. `fix: add Enter key sear
 
 - Open pull requests against `main` and fill in the template.
 - Keep each pull request to one topic, small enough to review in one sitting.
-- The checks below must pass for every part you changed. GitHub Actions does not run them yet, so run them locally.
+- The checks below must pass for every part you changed.
 
 ## Checks
 
+[checks.yml](.github/workflows/checks.yml) runs on every pull request and push to `main`. Each component runs when its folder changes; changes to the workflow run all three. Superseded runs are cancelled.
+
 - `backend/`: `mvn verify`. The tests use an in-memory database and need no Docker.
-- `frontend/`: `npm ci && npm run build:web`. The build fetches the machine list from the live API to generate the city pages. Set `API_URL` to use another backend.
+- `frontend/`: `npm ci && npm run typecheck`. The `typecheck` script runs `tsc --noEmit`. For web changes, also run `npm run build:web` locally; that build fetches the machine list from the live API to generate the city pages. Set `API_URL` to use another backend.
 - `admin-panel/`: `npm ci --legacy-peer-deps && npm run lint && npm run build`. `react-leaflet` 4 declares React 18 while the panel uses React 19, so a plain `npm ci` fails.
 
 ## Local development
