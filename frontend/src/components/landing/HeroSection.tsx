@@ -8,6 +8,7 @@ import {
   Image,
   Keyboard,
   FlatList,
+  Platform,
 } from 'react-native';
 import { Icon } from '../common/Icon';
 import { theme } from '../../theme';
@@ -67,7 +68,10 @@ export function HeroSection({
         <View style={styles.logoHalo}>
           <View style={styles.logoInner}>
             <Image
-              source={require('../../../assets/icon.png')}
+              source={Platform.select({
+                web: require('../../../assets/icon-128.png'),
+                default: require('../../../assets/icon.png'),
+              })}
               style={styles.logo}
               resizeMode="contain"
             />
