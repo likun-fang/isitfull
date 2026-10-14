@@ -1,0 +1,7 @@
+# Reusing a refresh token ends all of the user's sessions
+
+Refresh tokens are rotated: each refresh deletes the stored hash of the old token and stores the hash of the new one. A correctly signed, unexpired refresh token with no stored hash has therefore been rotated or revoked already, and `AuthService.refresh` treats it as reuse. It deletes every refresh token of that user and answers 401, so the user and anyone holding a copy of the token both have to sign in again. The transaction does not roll back on `UnauthorizedException`, so the revocation stays.
+
+The security review proposed a `used_at` column that marks rotated tokens instead of deleting them. That needs a schema change, and the project has no migration tool. A merge to `main` also deploys the backend at once, so every refresh would fail until someone altered the production table. The column would allow a grace period for two refreshes sent at the same time, but since pull request #24 the app shares one refresh across concurrent 401s and no longer sends them. Rejecting only the reused token would leave working the tokens issued to whoever used the copy first.
+
+A client must never send the same refresh token twice, and the shared refresh in `frontend/src/services/api.ts` exists for that reason. A refresh that is retried after its response was lost now signs the user out everywhere. This takes effect only once an app release carries the shared refresh; older app versions still send concurrent refreshes and would sign their users out.
