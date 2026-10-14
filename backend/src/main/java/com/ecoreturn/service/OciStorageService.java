@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,6 +25,9 @@ public class OciStorageService {
 
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png");
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final byte[] JPEG_MAGIC = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
+    private static final byte[] PNG_MAGIC = {(byte) 0x89, 0x50, 0x4E, 0x47};
+    private static final int HEADER_LENGTH = 4;
 
     private final ObjectStorage objectStorage;
     private final OciObjectStorageConfig config;
@@ -67,6 +72,27 @@ public class OciStorageService {
         if (!ALLOWED_TYPES.contains(file.getContentType())) {
             throw new IllegalArgumentException("Only JPEG and PNG images are allowed");
         }
+        // The client sets the Content-Type, so also check that the file starts like that image type
+        byte[] header = readHeader(file);
+        if (header.length < HEADER_LENGTH) {
+            throw new IllegalArgumentException("File too small to be a valid image");
+        }
+        if (!matchesMagicBytes(header, file.getContentType())) {
+            throw new IllegalArgumentException("File content does not match declared type");
+        }
+    }
+
+    private byte[] readHeader(MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream()) {
+            return inputStream.readNBytes(HEADER_LENGTH);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read screenshot file", e);
+        }
+    }
+
+    private boolean matchesMagicBytes(byte[] header, String contentType) {
+        byte[] magic = "image/png".equals(contentType) ? PNG_MAGIC : JPEG_MAGIC;
+        return Arrays.equals(header, 0, magic.length, magic, 0, magic.length);
     }
 
     private String getExtension(String contentType) {
