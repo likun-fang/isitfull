@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, '../dist');
 const SITE = 'https://isitfull.ie';
+const REPO_URL = 'https://github.com/likun-fang/isitfull';
 
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -96,12 +97,13 @@ function header() {
 function footer() {
   return `<footer class="footer"><div class="wrap">
     <p class="disclaimer">This is an independent community project and is not affiliated with, endorsed by, or connected to <a href="https://re-turn.ie/" rel="nofollow">Re-turn</a> or the Deposit Return Scheme operator.</p>
-    <p>&copy; 2026 Is It Full? All rights reserved.</p>
+    <p>&copy; 2026 Is It Full? &middot; Open source under the MIT licence.</p>
     <div class="footer-links">
       <a href="/downloads/">Downloads</a>
       <a href="/privacy/">Privacy</a>
       <a href="/terms/">Terms</a>
       <a href="/support/">Support</a>
+      <a href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </div></footer>`;
 }

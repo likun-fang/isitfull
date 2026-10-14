@@ -19,6 +19,7 @@ import { theme } from '../theme';
 import { Rvm, RvmStatus } from '../types';
 
 const DUBLIN_CENTER = { latitude: 53.349805, longitude: -6.26031 };
+const REPO_URL = 'https://github.com/likun-fang/isitfull';
 
 type ViewState = 'hero' | 'list' | 'location-denied';
 
@@ -196,15 +197,21 @@ export default function LandingPage() {
       >
         {renderContent()}
         {/* <DashboardStats /> */}
+        <footer style={footerStyles.container}>
+          <span>
+            This is an independent community project and is not affiliated with, endorsed by, or connected to{' '}
+            <a href="https://re-turn.ie/" rel="nofollow" style={footerStyles.link}>Re-turn</a>{' '}
+            or the Deposit Return Scheme operator.
+          </span>
+          <div style={footerStyles.repoLine}>
+            <Icon name="github" size={12} color={theme.colors.neutral[500]} />
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer" style={footerStyles.link}>
+              Open source on GitHub
+            </a>
+          </div>
+        </footer>
       </ScrollView>
       <DownloadBanner />
-      <div style={{ textAlign: 'center', padding: '12px 24px', borderTop: `1px solid ${theme.colors.neutral[200]}` }}>
-        <span style={{ fontSize: 12, color: theme.colors.neutral[400] }}>
-          This is an independent community project and is not affiliated with, endorsed by, or connected to{' '}
-          <a href="https://re-turn.ie/" rel="nofollow" style={{ color: theme.colors.neutral[400] }}>Re-turn</a>{' '}
-          or the Deposit Return Scheme operator.
-        </span>
-      </div>
       <SuccessModal
         visible={showSuccessModal}
         onClose={handleCloseSuccessModal}
@@ -212,6 +219,30 @@ export default function LandingPage() {
     </View>
   );
 }
+
+const footerStyles: Record<string, React.CSSProperties> = {
+  container: {
+    // Raw DOM elements do not get react-native-web's font stack.
+    fontFamily: '-apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontSize: 12,
+    color: theme.colors.neutral[500],
+    textAlign: 'center',
+    marginTop: 'auto',
+    backgroundColor: theme.colors.neutral[0],
+    padding: '12px 24px 88px',
+    borderTop: `1px solid ${theme.colors.neutral[200]}`,
+  },
+  link: {
+    color: theme.colors.neutral[500],
+  },
+  repoLine: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+};
 
 const styles = StyleSheet.create({
   container: {
