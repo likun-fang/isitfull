@@ -3,6 +3,8 @@ package com.ecoreturn.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -13,8 +15,16 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${app.cors.allowed-origins:}")
-    private String allowedOriginsConfig;
+    private static final String LOCAL_PROFILE = "local";
+
+    private final String allowedOriginsConfig;
+    private final Environment environment;
+
+    public WebConfig(@Value("${app.cors.allowed-origins:}") String allowedOriginsConfig,
+                     Environment environment) {
+        this.allowedOriginsConfig = allowedOriginsConfig;
+        this.environment = environment;
+    }
 
     @Bean
     public ShallowEtagHeaderFilter shallowEtagHeaderFilter() {
@@ -25,11 +35,14 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         List<String> origins = new ArrayList<>();
 
-        // Always allow localhost for development
-        origins.add("http://localhost:8081");
-        origins.add("http://localhost:19006");
-        origins.add("http://localhost:3000");
-        origins.add("exp://localhost:8081");
+        // Localhost only for local development: application.yml activates the "local" profile
+        // by default, and production overrides it with SPRING_PROFILES_ACTIVE=prod
+        if (environment.acceptsProfiles(Profiles.of(LOCAL_PROFILE))) {
+            origins.add("http://localhost:8081");
+            origins.add("http://localhost:19006");
+            origins.add("http://localhost:3000");
+            origins.add("exp://localhost:8081");
+        }
 
         // Add production origins from config
         if (allowedOriginsConfig != null && !allowedOriginsConfig.isEmpty()) {
