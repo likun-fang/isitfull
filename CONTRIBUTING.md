@@ -37,7 +37,7 @@ Use Conventional Commits: `<type>: <description>`, e.g. `fix: add Enter key sear
 
 ## Local development
 
-You need Docker, JDK 21, Maven and Node.js. Newer JDKs up to 24 also work.
+You need Docker, JDK 21, Maven and Node.js. Clean compilation and all 13 tests passed locally with Microsoft JDK 21.0.6, Temurin JDK 24 and Homebrew JDK 25.0.2. Set `JAVA_HOME` explicitly and check `mvn -v` to confirm which JDK Maven uses.
 
 ### Database and Redis
 
