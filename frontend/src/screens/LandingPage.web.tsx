@@ -48,7 +48,13 @@ export default function LandingPage() {
   }, [setAccessToken, setUser]);
 
   const accessToken = useAuthStore((s) => s.accessToken);
-  const { data: rvms, isLoading: rvmsLoading, refetch } = useNearbyRvms(location, 1000, 5);
+  const {
+    data: rvms,
+    isLoading: rvmsLoading,
+    isError,
+    error,
+    refetch,
+  } = useNearbyRvms(location, 1000, 5);
   const { data: backgroundRvms } = useNearbyRvms(accessToken ? DUBLIN_CENTER : null, 5000, 50);
   const { setQuery, suggestions, isLoading: isSearching } = useAddressSearch();
 
@@ -163,6 +169,9 @@ export default function LandingPage() {
               <RvmListView
                 rvms={rvms}
                 isLoading={rvmsLoading || isRequestingLocation}
+                isError={isError}
+                error={error}
+                onRetry={() => refetch()}
                 onReport={handleReport}
               />
             </View>
@@ -251,6 +260,9 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.lg,
   },
   listPadded: {
+    maxWidth: 640,
+    alignSelf: 'center',
+    width: '100%',
     paddingHorizontal: theme.spacing.lg,
   },
   backButton: {
