@@ -18,6 +18,9 @@ const PATHS: Record<string, string> = {
   'chevron-down': 'M6 9l6 6 6-6',
   'check-circle': 'M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3',
   clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2',
+  info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 16v-4 M12 8h.01',
+  'help-circle':
+    'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3 M12 17h.01',
   'x-circle':
     'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M15 9l-6 6 M9 9l6 6',
   'alert-triangle':
@@ -33,9 +36,15 @@ const PATHS: Record<string, string> = {
     'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22',
 };
 
+const warnedNames = new Set<string>();
+
 export function Icon({ name, size = 24, color = '#000', style }: IconProps) {
   const d = PATHS[name];
   if (!d) {
+    if (process.env.NODE_ENV !== 'production' && !warnedNames.has(name)) {
+      warnedNames.add(name);
+      console.warn(`Unknown web icon: "${name}". Add its Feather path to Icon.web.tsx.`);
+    }
     return <span style={{ display: 'inline-block', width: size, height: size, ...style }} />;
   }
 
