@@ -32,7 +32,7 @@ Use Conventional Commits: `<type>: <description>`, e.g. `fix: add Enter key sear
 [checks.yml](.github/workflows/checks.yml) runs on every pull request and push to `main`. Each component runs when its folder changes; changes to the workflow run all three. Superseded runs are cancelled.
 
 - `backend/`: `mvn verify`. The tests use an in-memory database and need no Docker.
-- `frontend/`: `npm ci && npm run typecheck`. The `typecheck` script runs `tsc --noEmit`. For web changes, also run `npm run build:web` locally; that build fetches the machine list from the live API to generate the city pages. Set `API_URL` to use another backend.
+- `frontend/`: `npm ci && npm run typecheck && npm test`. The `typecheck` script runs `tsc --noEmit`, and `npm test` runs Jest with the `jest-expo` preset. For web changes, also run `npm run build:web` locally; that build fetches the machine list from the live API to generate the city pages. Set `API_URL` to use another backend.
 - `admin-panel/`: `npm ci && npm run lint && npm run build`.
 
 ## Local development
