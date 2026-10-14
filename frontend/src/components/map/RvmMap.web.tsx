@@ -5,19 +5,6 @@ import { Rvm } from '../../types';
 import { getStatusColor } from '../../utils/statusColor';
 import { MAP_INITIAL_REGION } from '../../constants/config';
 
-// Inject Leaflet CSS from CDN (avoids Metro bundler issues with local CSS images)
-const injectLeafletCSS = () => {
-  if (typeof document !== 'undefined' && !document.getElementById('leaflet-css')) {
-    const link = document.createElement('link');
-    link.id = 'leaflet-css';
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-    link.crossOrigin = '';
-    document.head.appendChild(link);
-  }
-};
-
 interface Props {
   rvms: Rvm[];
   userLocation?: { latitude: number; longitude: number } | null;
@@ -68,11 +55,6 @@ function MapController({ center }: { center: [number, number] }) {
 }
 
 export function RvmMap({ rvms, userLocation, onMarkerPress }: Props) {
-  // Inject Leaflet CSS on mount
-  useEffect(() => {
-    injectLeafletCSS();
-  }, []);
-
   const center: [number, number] = userLocation
     ? [userLocation.latitude, userLocation.longitude]
     : [MAP_INITIAL_REGION.latitude, MAP_INITIAL_REGION.longitude];
@@ -105,7 +87,7 @@ export function RvmMap({ rvms, userLocation, onMarkerPress }: Props) {
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
         <MapController center={center} />

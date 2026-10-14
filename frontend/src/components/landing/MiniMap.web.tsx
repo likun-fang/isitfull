@@ -1,21 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, Marker, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import { Rvm } from '../../types';
 import { theme } from '../../theme';
 import { getStatusColor } from '../../utils/statusColor';
-
-const injectLeafletCSS = () => {
-  if (typeof document !== 'undefined' && !document.getElementById('leaflet-css')) {
-    const link = document.createElement('link');
-    link.id = 'leaflet-css';
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-    link.crossOrigin = '';
-    document.head.appendChild(link);
-  }
-};
 
 interface Props {
   location: { latitude: number; longitude: number } | null;
@@ -39,10 +27,6 @@ const createRvmMarkerIcon = (color: string) => {
 };
 
 export function MiniMap({ location, rvms }: Props) {
-  useEffect(() => {
-    injectLeafletCSS();
-  }, []);
-
   if (!location) {
     return null;
   }

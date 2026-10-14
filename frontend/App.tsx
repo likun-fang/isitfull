@@ -12,6 +12,8 @@ import { AuthProvider } from './src/providers/AuthProvider';
 import { AppGate } from './src/components/gate/AppGate';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { initSentry, Sentry } from './src/lib/sentry';
+// The stylesheet every web map needs, loaded once for the whole app. Metro turns CSS imports into empty modules on native.
+import 'leaflet/dist/leaflet.css';
 
 initSentry();
 
