@@ -8,16 +8,20 @@ import {
 } from 'react-native';
 import { Rvm, RvmStatus } from '../../types';
 import { EmptyState } from './EmptyState';
+import { ErrorState } from './ErrorState';
 import { RvmListItem } from './RvmListItem';
 import { theme } from '../../theme';
 
 interface Props {
   rvms: Rvm[] | undefined;
   isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+  onRetry: () => void;
   onReport?: (rvmId: number, status: RvmStatus) => void;
 }
 
-export function RvmListView({ rvms, isLoading, onReport }: Props) {
+export function RvmListView({ rvms, isLoading, isError, error, onRetry, onReport }: Props) {
   const renderItem: ListRenderItem<Rvm> = ({ item }) => (
     <RvmListItem
       rvm={item}
@@ -33,6 +37,10 @@ export function RvmListView({ rvms, isLoading, onReport }: Props) {
         <ActivityIndicator size="large" color={theme.colors.primary[600]} />
       </View>
     );
+  }
+
+  if (isError) {
+    return <ErrorState message={error?.message || 'Please try again.'} onRetry={onRetry} />;
   }
 
   if (!rvms || rvms.length === 0) {
@@ -57,7 +65,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listContent: {
-    paddingHorizontal: theme.spacing.lg,
     paddingBottom: 100,
   },
 });
