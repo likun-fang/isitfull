@@ -155,6 +155,7 @@ export default function LandingPage() {
             onSelectSuggestion={handleSelectSuggestion}
             suggestions={suggestions}
             isSearching={isSearching}
+            inputRef={searchInputRef}
           />
         );
 
