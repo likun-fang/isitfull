@@ -1,10 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TextInput, Alert, Platform, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, TouchableOpacity, Text } from 'react-native';
 import { Icon } from '../components/common/Icon';
 import { HeroSection } from '../components/landing/HeroSection';
 import { RvmListView } from '../components/landing/RvmListView';
 import { MiniMap } from '../components/landing/MiniMap.web';
-import { DashboardStats } from '../components/landing/DashboardStats';
 import { DownloadBanner } from '../components/landing/DownloadBanner';
 import { LocationDenied } from '../components/landing/LocationDenied';
 import { SuccessModal } from '../components/landing/SuccessModal';
@@ -16,7 +15,7 @@ import { reportService } from '../services/reportService';
 import { authService } from '../services/authService';
 import { useAuthStore } from '../stores/useAuthStore';
 import { theme } from '../theme';
-import { Rvm, RvmStatus } from '../types';
+import { RvmStatus } from '../types';
 
 const DUBLIN_CENTER = { latitude: 53.349805, longitude: -6.26031 };
 const REPO_URL = 'https://github.com/likun-fang/isitfull';
@@ -113,11 +112,6 @@ export default function LandingPage() {
     }, 100);
   }, []);
 
-  const handleRvmPress = useCallback((rvm: Rvm) => {
-    // For web landing page, we could navigate to detail or show info
-    // For now, this is a placeholder for future navigation
-  }, []);
-
   const handleReport = useCallback(async (rvmId: number, status: RvmStatus) => {
     if (!location) {
       return;
@@ -133,11 +127,7 @@ export default function LandingPage() {
       setShowSuccessModal(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to submit report';
-      if (Platform.OS === 'web') {
-        window.alert(message);
-      } else {
-        Alert.alert('Error', message);
-      }
+      window.alert(message);
     }
   }, [location, refetch]);
 
@@ -173,7 +163,6 @@ export default function LandingPage() {
               <RvmListView
                 rvms={rvms}
                 isLoading={rvmsLoading || isRequestingLocation}
-                onRvmPress={handleRvmPress}
                 onReport={handleReport}
               />
             </View>
@@ -197,7 +186,6 @@ export default function LandingPage() {
         showsVerticalScrollIndicator={false}
       >
         {renderContent()}
-        {/* <DashboardStats /> */}
         <footer style={footerStyles.container}>
           <span>
             This is an independent community project and is not affiliated with, endorsed by, or connected to{' '}

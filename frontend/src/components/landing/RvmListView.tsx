@@ -14,7 +14,6 @@ import { theme } from '../../theme';
 interface Props {
   rvms: Rvm[] | undefined;
   isLoading: boolean;
-  onRvmPress?: (rvm: Rvm) => void;
   onReport?: (rvmId: number, status: RvmStatus) => void;
 }
 
