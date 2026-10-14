@@ -8,13 +8,15 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/eco-return-backend
-  DEPLOY_DIR: /opt/app/eco-return
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/isitfull-backend
 
 jobs:
-  build-and-deploy:
+  build:
     if: github.repository_owner == 'likun-fang'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v7
 
@@ -24,11 +26,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Login to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v7
@@ -43,14 +46,17 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    permissions: {}
+    steps:
       - name: Deploy to Oracle VM
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            cd ${{ env.DEPLOY_DIR }}
-            docker compose -f docker-compose.prod.yml pull backend
-            docker compose -f docker-compose.prod.yml up -d backend
-            docker image prune -f
+          # The VM key's forced command reads this as the image tag.
+          script: ${{ github.sha }}
