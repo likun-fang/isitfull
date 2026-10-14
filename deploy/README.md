@@ -2,7 +2,7 @@
 
 > Target: Oracle Cloud VM.Standard.A1.Flex (ARM64), Docker Compose
 >
-> Strategy: GitHub Actions builds the image -> Push to Docker Hub -> Pull on VM
+> Strategy: GitHub Actions builds the image -> Push to GHCR -> Approval -> Pull on VM
 
 ## Architecture
 
@@ -43,53 +43,21 @@ sudo netfilter-persistent save
 
 ## Step 2: GitHub Actions -- Build and Deploy the Image
 
-`.github/workflows/deploy-backend.yml` runs on every push to `main` that changes `backend/`. You can also start it by hand from the repository's **Actions** tab. It:
+[The workflow](../.github/workflows/deploy-backend.yml) runs on pushes to `main` that change `backend/`. You can also start it from the repository's **Actions** tab. The build job runs only for the `likun-fang` repository owner. It builds `backend/Dockerfile` for `linux/arm64` and pushes `ghcr.io/likun-fang/isitfull-backend`, tagged `latest` and with the commit SHA. GHCR authentication uses the built-in `GITHUB_TOKEN`.
 
-1. Builds `backend/Dockerfile` for `linux/arm64`
-2. Pushes the image to Docker Hub, tagged `latest` and with the commit SHA
-3. SSHes into the VM and runs `pull backend` and `up -d backend` with `docker-compose.prod.yml` in `/opt/app/eco-return`
+Create the `production` environment under **Settings > Environments**. Add the maintainer, `likun-fang`, as a required reviewer. Allow self-review so the sole maintainer can approve their own runs, and disable administrator bypass. After a build succeeds, **Review deployments > production > Approve and deploy** releases the waiting deploy job. It connects to the VM with the restricted SSH key and runs [deploy.sh](deploy.sh). Wait until the VM setup below is complete before approving the first run.
 
-The Dockerfile builds with `mvn package -DskipTests`, so nothing runs the tests before a deploy. Run the backend checks in [CONTRIBUTING.md](../CONTRIBUTING.md#checks) before merging to `main`.
-
-Add these repository secrets under **Settings -> Secrets and variables -> Actions**:
+Add these three repository secrets under **Settings > Secrets and variables > Actions**:
 
 | Secret | Value |
 |--------|-------|
-| `DOCKERHUB_USERNAME` | Docker Hub username |
-| `DOCKERHUB_TOKEN` | Docker Hub access token |
-| `VM_HOST` | `<VM_PUBLIC_IP>` |
+| `VM_HOST` | VM public IP |
 | `VM_USER` | SSH user on the VM, e.g. `ubuntu` |
-| `VM_SSH_KEY` | Private SSH key for that user |
+| `VM_SSH_KEY` | Dedicated private SSH key whose public key is restricted in Step 4 |
 
-Until the VM is set up (steps 3 to 8), the SSH step fails, but the image is already pushed.
+After the first image push, make the GHCR package public: **Settings > Packages > isitfull-backend > Change visibility**. Otherwise, the VM user needs to run `docker login ghcr.io` with a token that has `read:packages` and access to the package.
 
-### Fallback: Build and Push by Hand
-
-Use this only if the workflow cannot run. On your Mac (one-time setup):
-
-```bash
-docker login
-export DOCKER_USER=your-dockerhub-username
-```
-
-Build the ARM64 image and push:
-
-```bash
-cd /path/to/Eco-Return-Ireland
-
-docker buildx build \
-  --platform linux/arm64 \
-  -t $DOCKER_USER/eco-return-backend:latest \
-  -f backend/Dockerfile \
-  backend/ \
-  --push
-```
-
-> If `buildx` is not set up yet:
-> ```bash
-> docker buildx create --name arm-builder --use
-> docker buildx inspect --bootstrap
-> ```
+The Dockerfile builds with `mvn package -DskipTests`. Run the backend checks in [CONTRIBUTING.md](../CONTRIBUTING.md#checks) before merging.
 
 ---
 
@@ -124,7 +92,7 @@ cd /opt/app/eco-return
 mkdir -p config
 ```
 
-Transfer files from the repository root on your Mac:
+Transfer files from the repository root on your Mac using your normal SSH key:
 
 ```bash
 VM_IP=<VM_PUBLIC_IP>
@@ -132,9 +100,35 @@ VM_USER=ubuntu
 
 scp deploy/docker-compose.prod.yml $VM_USER@$VM_IP:/opt/app/eco-return/
 scp deploy/Caddyfile $VM_USER@$VM_IP:/opt/app/eco-return/
+scp deploy/deploy.sh $VM_USER@$VM_IP:/opt/app/eco-return/deploy.sh
 scp deploy/.env.production.example $VM_USER@$VM_IP:/opt/app/eco-return/
 scp path/to/firebase-service-account.json $VM_USER@$VM_IP:/opt/app/eco-return/config/
 scp backend/src/main/resources/db/init.sql $VM_USER@$VM_IP:/opt/app/eco-return/config/
+```
+
+On the VM, make the script executable and prepare the SSH key file:
+
+```bash
+chmod 755 /opt/app/eco-return/deploy.sh
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+touch ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Append this line to that user's `~/.ssh/authorized_keys`, replacing `<public key>` with the dedicated key's public value:
+
+```text
+command="/opt/app/eco-return/deploy.sh",no-port-forwarding,no-agent-forwarding,no-pty,no-X11-forwarding ssh-ed25519 <public key>
+```
+
+This key can only run the deployment script. The script reads the remote command text from `SSH_ORIGINAL_COMMAND` as the image tag and accepts only a 40-character lowercase commit SHA or an empty value. Keep your normal SSH key for maintenance and file transfers. The script pulls and starts the backend, prunes unused images, and writes the selected image and completion lines to the SSH output shown in Actions. A failed command stops the script and fails the workflow job.
+
+Compose defaults to the GHCR image. Remove or update any old `DOCKER_IMAGE` override in the shell or `.env`, then confirm the resolved image on the VM:
+
+```bash
+cd /opt/app/eco-return
+docker compose -f docker-compose.prod.yml config | grep image
 ```
 
 The full RVM dataset is not in the repository. The maintainer copies it from outside the repository to `/opt/app/eco-return/config/1.json`:
@@ -157,7 +151,7 @@ Fill in all values:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `DOCKER_IMAGE` | Docker Hub image path | `myuser/eco-return-backend:latest` |
+| `DOCKER_IMAGE` | Optional image override; Compose reads it from the shell or `.env` | `ghcr.io/likun-fang/isitfull-backend:latest` |
 | `DB_USERNAME` | PostgreSQL username | `eco_return_user` |
 | `DB_PASSWORD` | PostgreSQL password | (generate below) |
 | `REDIS_PASSWORD` | Redis password | (generate below) |
@@ -271,15 +265,9 @@ Login to the admin panel and change this immediately.
 
 ### Update and Redeploy
 
-Push or merge to `main` with changes under `backend/`, and the workflow (Step 2) builds and deploys the new image. To redeploy without a backend change, start it from the **Actions** tab.
+Merge backend changes to `main`, then approve the deployment as described in [Step 2](#step-2-github-actions----build-and-deploy-the-image). For a redeploy or changes outside `backend/`, use **Actions > Deploy Backend > Run workflow** on `main`.
 
-If the workflow cannot run, build and push by hand as in the Step 2 fallback, then on the VM:
-
-```bash
-cd /opt/app/eco-return
-docker compose -f docker-compose.prod.yml pull backend
-docker compose -f docker-compose.prod.yml up -d backend
-```
+The approved run deploys its own commit's image, even if a newer build has finished. Running `/opt/app/eco-return/deploy.sh` by hand on the VM with no `SSH_ORIGINAL_COMMAND` deploys `latest`.
 
 ### View Logs
 

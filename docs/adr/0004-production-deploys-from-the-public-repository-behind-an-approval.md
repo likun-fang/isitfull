@@ -1,0 +1,7 @@
+# Production deploys from the public repository behind an approval
+
+Production deploys from the public `likun-fang/isitfull` repository. [The workflow](../../.github/workflows/deploy-backend.yml) builds the backend image on GHCR with the built-in `GITHUB_TOKEN`. The deploy job waits for the maintainer's approval in the `production` environment. Its dedicated SSH key can only run [deploy.sh](../../deploy/deploy.sh) on the VM. [The deployment guide](../../deploy/README.md#step-2-github-actions----build-and-deploy-the-image) covers the environment, secrets and VM setup.
+
+Deploying from the private archive would split the source of production changes from the public repository where they are reviewed. Watchtower polling would update the VM without a per-run approval and leave deployment failures outside Actions. Docker Hub would require a separate registry credential. GHCR uses the repository's built-in token for publishing.
+
+Every merge to `main` that changes `backend/` builds an image. A manual workflow run handles other changes and redeploys. Only an approved deploy job touches the VM, and forks never receive this repository's secrets. The owner condition also skips builds in forks. Deploy failures and the script's output are visible in Actions. The approved run deploys its own commit's image, even if a newer build has finished. The forced command reads the commit SHA from `SSH_ORIGINAL_COMMAND`. Running the script by hand on the VM with no `SSH_ORIGINAL_COMMAND` deploys `latest`.
