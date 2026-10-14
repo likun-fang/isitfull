@@ -1,5 +1,7 @@
 package com.ecoreturn.exception;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -79,6 +81,17 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void invalidRequestBody_returns400NamingTheInvalidField() throws Exception {
+        mockMvc.perform(post("/test/validated")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"deviceId\": \"\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("deviceId: must not be blank"));
+    }
+
+    @Test
     void malformedJsonBody_returns400InTheApiEnvelope() throws Exception {
         mockMvc.perform(post("/test/body")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,5 +120,14 @@ class GlobalExceptionHandlerTest {
         String body(@RequestBody Map<String, String> body) {
             return "ok";
         }
+
+        @PostMapping("/validated")
+        String validated(@Valid @RequestBody DeviceRequest request) {
+            return "ok";
+        }
+    }
+
+    // The message is set explicitly so the test does not depend on the JVM's locale.
+    record DeviceRequest(@NotBlank(message = "must not be blank") String deviceId) {
     }
 }
