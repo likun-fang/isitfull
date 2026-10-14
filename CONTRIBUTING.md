@@ -33,7 +33,7 @@ Use Conventional Commits: `<type>: <description>`, e.g. `fix: add Enter key sear
 
 - `backend/`: `mvn verify`. The tests use an in-memory database and need no Docker.
 - `frontend/`: `npm ci && npm run typecheck`. The `typecheck` script runs `tsc --noEmit`. For web changes, also run `npm run build:web` locally; that build fetches the machine list from the live API to generate the city pages. Set `API_URL` to use another backend.
-- `admin-panel/`: `npm ci --legacy-peer-deps && npm run lint && npm run build`. `react-leaflet` 4 declares React 18 while the panel uses React 19, so a plain `npm ci` fails.
+- `admin-panel/`: `npm ci && npm run lint && npm run build`.
 
 ## Local development
 
@@ -70,4 +70,4 @@ Run `npx expo start` and press `w` to open the web app. The iOS and Android apps
 
 ### Admin panel
 
-From `admin-panel/`, run `npm ci --legacy-peer-deps` and create `.env.local` containing `NEXT_PUBLIC_API_URL=http://localhost:8080`. Then run `npm run dev`, open `http://localhost:3000` and log in with the admin account above.
+From `admin-panel/`, run `npm ci` and create `.env.local` containing `NEXT_PUBLIC_API_URL=http://localhost:8080`. Then run `npm run dev`, open `http://localhost:3000` and log in with the admin account above.
