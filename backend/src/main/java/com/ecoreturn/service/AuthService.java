@@ -68,7 +68,8 @@ public class AuthService {
         return generateAuthResponse(user);
     }
 
-    @Transactional
+    // noRollbackFor keeps the revocation below when the reused token is rejected
+    @Transactional(noRollbackFor = UnauthorizedException.class)
     public AuthResponse refresh(String refreshToken) {
         Long userId = jwtService.validateAndGetUserId(refreshToken);
         if (userId == null) {
@@ -81,7 +82,18 @@ public class AuthService {
                         .eq(RefreshToken::getTokenHash, tokenHash)
         );
 
-        if (stored == null || stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (stored == null) {
+            // The token is correctly signed and unexpired, so its row existed and was deleted
+            // when the token was rotated or revoked. Seeing it again means a copy may be in use:
+            // end every session of this user so both holders have to sign in again.
+            refreshTokenMapper.delete(
+                    new LambdaQueryWrapper<RefreshToken>()
+                            .eq(RefreshToken::getUserId, userId)
+            );
+            throw new UnauthorizedException("Refresh token reuse detected. Please log in again.");
+        }
+
+        if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new UnauthorizedException("Refresh token expired or revoked");
         }
 
