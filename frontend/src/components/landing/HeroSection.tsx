@@ -20,6 +20,7 @@ interface Props {
   onSelectSuggestion: (suggestion: AddressSuggestion) => void;
   suggestions: AddressSuggestion[];
   isSearching: boolean;
+  inputRef?: React.RefObject<TextInput | null>;
 }
 
 export function HeroSection({
@@ -28,6 +29,7 @@ export function HeroSection({
   onSelectSuggestion,
   suggestions,
   isSearching,
+  inputRef,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -115,6 +117,7 @@ export function HeroSection({
                 style={styles.searchIcon}
               />
               <TextInput
+                ref={inputRef}
                 style={styles.searchInput}
                 value={searchQuery}
                 onChangeText={handleTextChange}

@@ -20,8 +20,8 @@ export function LocationDenied({ onSearchClick }: Props) {
       <Text style={styles.title}>Location access needed</Text>
 
       <Text style={styles.description}>
-        We need your location to find nearby RVMs.{'\n\n'}Please enable GPS in
-        your browser settings, or type your Eircode in the search box above.
+        Location access was not granted. Allow it for this site in your browser's
+        site settings, or search by Eircode or address instead.
       </Text>
 
       <TouchableOpacity
