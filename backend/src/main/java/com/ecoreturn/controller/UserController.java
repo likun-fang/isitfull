@@ -25,6 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
+    private static final int MAX_KARMA_LOG_PAGE_SIZE = 100;
+
     private final UserService userService;
     private final KarmaLogMapper karmaLogMapper;
     private final DisplayNameValidator displayNameValidator;
@@ -70,8 +72,10 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Long userId = UserContext.getCurrentUserId();
+        int cappedSize = Math.min(Math.max(size, 1), MAX_KARMA_LOG_PAGE_SIZE);
+        int firstPageOrLater = Math.max(page, 0);
         List<KarmaLogDto> logs = karmaLogMapper.findByUserIdWithRvmName(
-                userId, size, page * size);
+                userId, cappedSize, firstPageOrLater * cappedSize);
         return ResponseEntity.ok(ApiResponse.success(logs));
     }
 
