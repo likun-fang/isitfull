@@ -1,5 +1,6 @@
 package com.ecoreturn.controller;
 
+import com.ecoreturn.annotation.RateLimit;
 import com.ecoreturn.annotation.RequireAuth;
 import com.ecoreturn.config.UserContext;
 import com.ecoreturn.dto.ApiResponse;
@@ -7,6 +8,7 @@ import com.ecoreturn.dto.AuthResponse;
 import com.ecoreturn.dto.KarmaLogDto;
 import com.ecoreturn.dto.UpdateDisplayNameRequest;
 import com.ecoreturn.entity.User;
+import com.ecoreturn.enums.RateLimitType;
 import com.ecoreturn.enums.UserRank;
 import com.ecoreturn.mapper.KarmaLogMapper;
 import com.ecoreturn.service.DisplayNameValidator;
@@ -74,6 +76,7 @@ public class UserController {
     }
 
     @GetMapping("/top-contributors")
+    @RateLimit(rate = 120, rateInterval = 60, limitType = RateLimitType.IP)
     public ResponseEntity<ApiResponse<List<TopContributorDto>>> getTopContributors(
             @RequestParam(defaultValue = "5") int limit) {
         if (limit > 20) limit = 20;
