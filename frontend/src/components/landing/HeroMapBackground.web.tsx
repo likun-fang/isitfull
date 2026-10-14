@@ -1,31 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
 import { Rvm } from '../../types';
 import { theme } from '../../theme';
 
 const DUBLIN_CENTER: [number, number] = [53.349805, -6.26031];
 
-const injectLeafletCSS = () => {
-  if (typeof document !== 'undefined' && !document.getElementById('leaflet-css')) {
-    const link = document.createElement('link');
-    link.id = 'leaflet-css';
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-    link.crossOrigin = '';
-    document.head.appendChild(link);
-  }
-};
-
 interface Props {
   rvms: Rvm[] | undefined;
 }
 
 export function HeroMapBackground({ rvms }: Props) {
-  useEffect(() => {
-    injectLeafletCSS();
-  }, []);
-
   return (
     <div style={styles.wrapper}>
       <style>{`
