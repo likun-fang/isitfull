@@ -1,5 +1,7 @@
 # Is It Full?
 
+[![Checks](https://github.com/likun-fang/isitfull/actions/workflows/checks.yml/badge.svg)](https://github.com/likun-fang/isitfull/actions/workflows/checks.yml)
+
 Is It Full? ([isitfull.ie](https://isitfull.ie)) helps people in Ireland find Re-turn reverse vending machines, the machines that take back bottles and cans under the Deposit Return Scheme. People who visit a machine report whether it is available, busy or broken, and the app shows each machine's latest status on a map. It is an independent community project, not affiliated with Re-turn or the scheme's operator.
 
 ## Parts
