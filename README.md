@@ -18,6 +18,8 @@ The backend keeps its data in PostgreSQL with PostGIS, which finds the machines 
 
 [CONTRIBUTING.md](CONTRIBUTING.md) explains how to run each part locally and which checks to run.
 
+To run it for another city or country, see [Running your own instance](CONTRIBUTING.md#running-your-own-instance).
+
 ## License
 
 MIT. See [LICENSE](LICENSE). The name "Is It Full?", the logo and the app icons are not covered by the MIT license; the retailer logos under `frontend/assets/brands/` belong to their respective owners.
