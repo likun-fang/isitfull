@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from '../common/Icon';
 import { theme } from '../../theme';
+import { openDownloadsPage } from './openDownloadsPage';
 
 export function EmptyState() {
   return (
@@ -22,7 +23,7 @@ export function EmptyState() {
 
       <TouchableOpacity
         style={styles.downloadButton}
-        onPress={() => Linking.openURL('/downloads')}
+        onPress={openDownloadsPage}
         activeOpacity={0.8}
       >
         <Text style={styles.downloadButtonText}>Get the App</Text>

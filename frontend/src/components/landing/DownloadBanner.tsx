@@ -4,11 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Linking,
 } from 'react-native';
 import { Icon } from '../common/Icon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, typography } from '../../theme';
+import { openDownloadsPage } from './openDownloadsPage';
 
 const STORAGE_KEY = 'download_banner_dismissed_at';
 const DISMISS_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -60,7 +60,7 @@ export function DownloadBanner() {
         <Text style={styles.text}>Get the app for free!</Text>
         <TouchableOpacity
           style={styles.downloadButton}
-          onPress={() => Linking.openURL('/downloads')}
+          onPress={openDownloadsPage}
           activeOpacity={0.85}
         >
           <Text style={styles.downloadButtonText}>Download</Text>
