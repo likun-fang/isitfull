@@ -1,0 +1,58 @@
+{
+  "cli": {
+    "version": ">= 3.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "store",
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.isitfull.ie/api/v1",
+        "SENTRY_ORG": "isitfull",
+        "SENTRY_PROJECT": "react-native"
+      },
+      "android": {
+        "autoIncrement": true
+      },
+      "ios": {
+        "autoIncrement": true
+      }
+    },
+    "production": {
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.isitfull.ie/api/v1",
+        "SENTRY_ORG": "isitfull",
+        "SENTRY_PROJECT": "react-native"
+      },
+      "android": {
+        "autoIncrement": true
+      },
+      "ios": {
+        "autoIncrement": true
+      }
+    }
+  },
+  "submit": {
+    "preview": {
+      "android": {
+        "serviceAccountKeyPath": "./eas-submit-key.json",
+        "track": "alpha"
+      }
+    },
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./eas-submit-key.json",
+        "track": "production"
+      }
+    }
+  }
+}

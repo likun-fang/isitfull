@@ -1,0 +1,51 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+application-local.yml
+**/application-local.yml
+
+# Firebase configuration
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+frontend/GoogleService-Info.plist
+frontend/google-services.json
+
+# Signing credentials
+frontend/eas-submit-key.json
+*.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Production deployment configuration
+/deploy/config/
+
+# Dependencies
+node_modules/
+target/
+
+# Build outputs
+dist/
+build/
+*.jar
+
+# Worktrees
+.worktrees/
+worktrees/
+
+# Logs
+*.log
+logs/
+frontend/bugreport-*.zip

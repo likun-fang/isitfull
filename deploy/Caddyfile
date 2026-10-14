@@ -1,0 +1,3 @@
+api.isitfull.ie {
+	reverse_proxy backend:8080
+}

@@ -1,0 +1,94 @@
+
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: eco-return-backend
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eco_return
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.ecoreturn.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+logging:
+  level:
+    root: INFO
+    com.ecoreturn: INFO
+    com.ecoreturn.mapper: WARN
+    org.postgresql: WARN
+    com.ecoreturn.scheduler: INFO
+    com.ecoreturn.service: INFO
+    com.ecoreturn.controller: DEBUG
+    org.springframework.web: WARN
+    org.springframework.jdbc: WARN
+    org.springframework.data.redis: WARN
+    com.zaxxer.hikari: WARN
+    org.mybatis: WARN
+    com.baomidou.mybatisplus: WARN
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:your-256-bit-secret-key-here-must-be-at-least-32-chars}
+    access-token-expiry: 3600000
+    refresh-token-expiry: 2592000000
+  location-iq:
+    api-key: ${LOCATIONIQ_API_KEY:your-locationiq-key}
+  google:
+    geocoding-api-key: ${GOOGLE_GEOCODING_API_KEY:your-google-key}
+  mapbox:
+    access-token: ${MAPBOX_ACCESS_TOKEN:your-mapbox-token}
+    monthly-limit: 45000
+  firebase:
+    service-account: ${FIREBASE_SERVICE_ACCOUNT:classpath:firebase-service-account.json}
+  oci:
+    object-storage:
+      enabled: ${OCI_STORAGE_ENABLED:false}
+      region: ${OCI_REGION:eu-amsterdam-1}
+      namespace: ${OCI_NAMESPACE:}
+      bucket: ${OCI_BUCKET:isitfull-feedback}
+      auth-type: ${OCI_AUTH_TYPE:config_file}
+      config-file: ${OCI_CONFIG_FILE:~/.oci/config}
+      profile: ${OCI_PROFILE:DEFAULT}
+
+rvm:
+  seed-file: ${RVM_SEED_FILE:data/rvm-sample.json}

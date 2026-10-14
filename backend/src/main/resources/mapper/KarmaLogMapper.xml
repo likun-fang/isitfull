@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecoreturn.mapper.KarmaLogMapper">
+
+    <select id="findByUserIdWithRvmName" resultType="com.ecoreturn.dto.KarmaLogDto">
+        SELECT
+            kl.id,
+            kl.points,
+            kl.reason,
+            kl.ref_type as refType,
+            kl.ref_id as refId,
+            CASE
+                WHEN kl.ref_type = 'RVM' THEN r1.name
+                WHEN kl.ref_type = 'REPORT' THEN r2.name
+                ELSE NULL
+            END as rvmName,
+            kl.created_at as createdAt
+        FROM karma_logs kl
+        LEFT JOIN rvm r1 ON kl.ref_type = 'RVM' AND kl.ref_id = r1.id
+        LEFT JOIN report rep ON kl.ref_type = 'REPORT' AND kl.ref_id = rep.id
+        LEFT JOIN rvm r2 ON rep.rvm_id = r2.id
+        WHERE kl.user_id = #{userId}
+        ORDER BY kl.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+</mapper>

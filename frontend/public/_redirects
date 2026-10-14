@@ -1,0 +1,6 @@
+# Trailing slash redirects (301 instead of Cloudflare's default 308)
+/find/:city  /find/:city/  301
+/find        /find/        301
+
+# SPA fallback
+/*  /index.html  200

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ecoreturn.mapper.RvmMapper">
+
+    <resultMap id="RvmResultMap" type="com.ecoreturn.entity.Rvm">
+        <id property="id" column="id"/>
+        <result property="externalId" column="external_id"/>
+        <result property="name" column="name"/>
+        <result property="city" column="city"/>
+        <result property="postalCode" column="postal_code"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="openHours" column="open_hours"/>
+        <result property="status" column="status"/>
+        <result property="queueLength" column="queue_length"/>
+        <result property="confidenceScore" column="confidence_score"/>
+        <result property="statusUpdatedAt" column="status_updated_at"/>
+        <result property="lastCalculatedAt" column="last_calculated_at"/>
+        <result property="adminLocked" column="admin_locked"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findNearby" resultMap="RvmResultMap">
+        SELECT
+            id,
+            external_id,
+            name,
+            city,
+            postal_code,
+            latitude,
+            longitude,
+            open_hours,
+            status,
+            queue_length,
+            confidence_score,
+            status_updated_at,
+            last_calculated_at,
+            admin_locked,
+            created_at
+        FROM rvm
+        WHERE status != 'REMOVED'
+        AND ST_DWithin(
+            location::geography,
+            ST_SetSRID(ST_MakePoint(#{lng}, #{lat}), 4326)::geography,
+            #{radiusMeters}
+        )
+        ORDER BY ST_Distance(
+            location::geography,
+            ST_SetSRID(ST_MakePoint(#{lng}, #{lat}), 4326)::geography
+        )
+        LIMIT #{limit}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE rvm
+        SET status = #{status},
+            confidence_score = #{confidenceScore},
+            queue_length = #{queueLength},
+            status_updated_at = #{statusUpdatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findAllIds" resultType="java.lang.Long">
+        SELECT id FROM rvm
+    </select>
+
+    <select id="findUnlockedIds" resultType="java.lang.Long">
+        SELECT id FROM rvm WHERE admin_locked = FALSE
+    </select>
+
+    <update id="updateAdminStatus">
+        UPDATE rvm
+        SET status = #{status},
+            admin_locked = #{adminLocked},
+            status_updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="countByStatusIn" resultType="long">
+        SELECT COUNT(*) FROM rvm
+        WHERE status IN
+        <foreach collection="statuses" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+    </select>
+
+    <select id="findUnlockedStatuses" resultType="com.ecoreturn.dto.RvmStatusSnapshot">
+        SELECT id, status, confidence_score, queue_length, status_updated_at
+        FROM rvm WHERE admin_locked = FALSE
+    </select>
+
+    <!-- Batch size 500 x 5 fields = 2500 params, well under PG's 32767 limit. Do NOT increase batch size without recalculating. -->
+    <update id="batchUpdateStatus">
+        <foreach collection="updates" item="u" separator=";">
+            UPDATE rvm SET
+                status = #{u.status},
+                confidence_score = #{u.confidenceScore},
+                queue_length = #{u.queueLength},
+                status_updated_at = #{u.statusUpdatedAt}
+            WHERE id = #{u.id}
+        </foreach>
+    </update>
+
+</mapper>

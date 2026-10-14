@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Native build artifacts
+/android
+/ios
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Build artifacts
+*.ipa
+*.aab
+*.apk
+
+# Assets not needed for build
+assets/feature-graphic.png
+
+# Debug
+bugreport-*.zip
+
+# Misc
+11224.json
+.DS_Store
