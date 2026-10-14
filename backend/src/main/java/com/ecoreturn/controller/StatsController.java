@@ -1,7 +1,9 @@
 package com.ecoreturn.controller;
 
+import com.ecoreturn.annotation.RateLimit;
 import com.ecoreturn.dto.ApiResponse;
 import com.ecoreturn.dto.DashboardStatsDto;
+import com.ecoreturn.enums.RateLimitType;
 import com.ecoreturn.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,7 @@ public class StatsController {
      * @return ApiResponse containing DashboardStatsDto
      */
     @GetMapping("/dashboard")
+    @RateLimit(rate = 120, rateInterval = 60, limitType = RateLimitType.IP)
     public ResponseEntity<ApiResponse<DashboardStatsDto>> getDashboardStats() {
         DashboardStatsDto stats = statsService.getDashboardStats();
         return ResponseEntity.ok(ApiResponse.success(stats));

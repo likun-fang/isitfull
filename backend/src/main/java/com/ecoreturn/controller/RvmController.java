@@ -1,7 +1,9 @@
 package com.ecoreturn.controller;
 
+import com.ecoreturn.annotation.RateLimit;
 import com.ecoreturn.dto.ApiResponse;
 import com.ecoreturn.dto.RvmDto;
+import com.ecoreturn.enums.RateLimitType;
 import com.ecoreturn.service.RvmService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,11 @@ public class RvmController {
      *
      * @return ApiResponse containing list of all RvmDto
      */
+    // Per-IP limits on the public read endpoints are generous on purpose: Irish mobile networks
+    // (Three, Vodafone, eir) put many users behind one carrier-grade NAT address, and a single
+    // map pan fires several /nearby calls per user.
     @GetMapping("/all")
+    @RateLimit(rate = 300, rateInterval = 60, limitType = RateLimitType.IP)
     public ResponseEntity<ApiResponse<List<RvmDto>>> getAllRvms() {
         List<RvmDto> rvms = rvmService.findAll();
         ApiResponse.Meta meta = new ApiResponse.Meta(rvms.size(), null);
@@ -53,6 +59,7 @@ public class RvmController {
      * @return ApiResponse containing list of RvmDto with meta information
      */
     @GetMapping("/nearby")
+    @RateLimit(rate = 600, rateInterval = 60, limitType = RateLimitType.IP)
     public ResponseEntity<ApiResponse<List<RvmDto>>> findNearby(
             @RequestParam double lat,
             @RequestParam double lng,
@@ -70,6 +77,7 @@ public class RvmController {
     }
 
     @GetMapping("/batch")
+    @RateLimit(rate = 300, rateInterval = 60, limitType = RateLimitType.IP)
     public ResponseEntity<ApiResponse<List<RvmDto>>> findByIds(
             @RequestParam List<Long> ids,
             @RequestParam(required = false) Double lat,
@@ -85,6 +93,7 @@ public class RvmController {
      * @return ApiResponse containing the RvmDto if found, or error response
      */
     @GetMapping("/{id}")
+    @RateLimit(rate = 600, rateInterval = 60, limitType = RateLimitType.IP)
     public ResponseEntity<ApiResponse<RvmDto>> findById(
             @PathVariable Long id,
             @RequestParam(required = false) Double lat,
