@@ -5,10 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  Linking,
 } from 'react-native';
 import { Icon } from '../common/Icon';
 import { colors, spacing, borderRadius, typography } from '../../theme';
+import { openDownloadsPage } from './openDownloadsPage';
 
 interface SuccessModalProps {
   visible: boolean;
@@ -39,7 +39,7 @@ export function SuccessModal({ visible, onClose }: SuccessModalProps) {
 
           <TouchableOpacity
             style={styles.primaryButton}
-            onPress={() => Linking.openURL('/downloads')}
+            onPress={openDownloadsPage}
             activeOpacity={0.85}
           >
             <Icon name="download" size={18} color={colors.neutral[0]} />
