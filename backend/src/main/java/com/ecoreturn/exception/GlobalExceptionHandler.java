@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 // Extends ResponseEntityExceptionHandler so Spring MVC's own exceptions (missing parameter,
 // malformed body, unknown path, wrong method, ...) keep their 4xx status instead of reaching
-// the catch-all below.
+// the catch-all below. Error responses explicitly use JSON even when XML converters are present.
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -27,24 +28,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadRequestException(BadRequestException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("BAD_REQUEST", e.getMessage()));
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(UnauthorizedException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("UNAUTHORIZED", e.getMessage()));
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ApiResponse<Void>> handleForbiddenException(ForbiddenException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("FORBIDDEN", e.getMessage()));
     }
 
     @ExceptionHandler(GeofenceException.class)
     public ResponseEntity<ApiResponse<Void>> handleGeofenceException(GeofenceException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("GEOFENCE_FAILED", e.getMessage()));
     }
 
@@ -56,18 +61,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         response.put("message", e.getMessage());
         response.put("retryAfterSeconds", e.getRetryAfterSeconds());
 
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(response);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("INVALID_REQUEST", e.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("CONFLICT", e.getMessage()));
     }
 
@@ -78,6 +87,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
             .collect(Collectors.joining(", "));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("VALIDATION_ERROR", message));
     }
 
@@ -87,6 +97,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleUnexpectedException(Exception e) {
         log.error("Unhandled exception", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
     }
 
@@ -105,6 +116,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             : httpStatus.getReasonPhrase();
         return ResponseEntity.status(httpStatus)
             .headers(standard.getHeaders())
+            .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.error(httpStatus.name(), message));
     }
 }

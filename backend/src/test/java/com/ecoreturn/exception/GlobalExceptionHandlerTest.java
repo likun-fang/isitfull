@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,6 +34,7 @@ class GlobalExceptionHandlerTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .alwaysExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .build();
     }
 
@@ -100,6 +102,32 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("Failed to read request"));
+    }
+
+    @Test
+    void unexpectedException_returnsJsonEvenWhenXmlIsRequested() throws Exception {
+        mockMvc.perform(get("/test/failure").accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("INTERNAL_ERROR"));
+    }
+
+    @Test
+    void wrongHttpMethod_preservesAllowHeaderAndReturnsJsonWhenXmlIsRequested() throws Exception {
+        mockMvc.perform(delete("/test/number").accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(header().string("Allow", containsString("GET")))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("METHOD_NOT_ALLOWED"));
+    }
+
+    @Test
+    void successfulNumberRequest_returns406WhenOnlyXmlIsAccepted() throws Exception {
+        mockMvc.perform(get("/test/number").param("value", "42")
+                        .accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("NOT_ACCEPTABLE"));
     }
 
     @RestController
