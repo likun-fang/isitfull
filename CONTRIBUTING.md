@@ -71,3 +71,21 @@ Run `npx expo start` and press `w` to open the web app. The iOS and Android apps
 ### Admin panel
 
 From `admin-panel/`, run `npm ci` and create `.env.local` containing `NEXT_PUBLIC_API_URL=http://localhost:8080`. Then run `npm run dev`, open `http://localhost:3000` and log in with the admin account above.
+
+## Running your own instance
+
+To run the project for another city or country, fork it and change the values below.
+
+In `frontend/app.config.ts`, set `owner` to your Expo account, choose your own `slug` and `scheme`, and put your Expo project's ID in `updates.url` and `extra.eas.projectId`. Give the apps their own `ios.bundleIdentifier` and `android.package`. `userInterfaceStyle` can stay. The name "Is It Full?" and the icons are not covered by the MIT license, so change `name` and the images in `frontend/assets/` as well.
+
+Register the new bundle ID and package as iOS and Android apps in your Firebase project, then fill in the two config files from the example files, as [Frontend](#frontend) describes.
+
+`frontend/eas.json` holds the `development`, `preview` and `production` build profiles. Its submit profiles read the Google Play service account key from `frontend/eas-submit-key.json`, which git ignores. The `preview` and `production` profiles also set `EXPO_PUBLIC_API_URL`, `SENTRY_ORG` and `SENTRY_PROJECT`. Point the API URL at your backend there and in `frontend/.env.example`.
+
+On the backend, set `CORS_ALLOWED_ORIGINS` to the origins of your web app. [deploy/README.md](deploy/README.md) lists the other required environment variables and the server setup. The API's domain is set in `deploy/Caddyfile`.
+
+`.github/workflows/deploy-backend.yml` needs the repository secrets listed in [deploy/README.md](deploy/README.md#step-2-github-actions----build-and-deploy-the-image). Its job runs only when `github.repository_owner` is `likun-fang`. Change that to your own account or organisation, or the deploy never runs in your fork.
+
+The machine dataset is not part of the repository. [backend/data/README.md](backend/data/README.md) explains how to import one.
+
+Some of the code assumes Ireland. The daily machine sync reads Re-turn's feed (`backend/src/main/java/com/ecoreturn/client/ReturnApiClient.java`). Address search is limited to Ireland in `LocationIqClient.java` and `GoogleGeocodingClient.java` in the same folder. The map opens on Dublin (`MAP_INITIAL_REGION` in `frontend/src/constants/config.ts`). `isitfull.ie` appears in the web build scripts in `frontend/scripts/` and in several screens in `frontend/src/screens/`.
