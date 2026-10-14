@@ -34,7 +34,10 @@ public class RateLimitAspect {
 
         RRateLimiter rateLimiter = redissonClient.getRateLimiter(key);
         rateLimiter.expire(Duration.ofHours(1));
-        rateLimiter.setRate(
+        // setRate also deletes the requests counted so far, so calling it here reset the
+        // limiter on every request. trySetRate writes the config only when the key has none;
+        // a changed limit applies once the key has been idle for the hour above.
+        rateLimiter.trySetRate(
             RateType.OVERALL,
             rateLimit.rate(),
             rateLimit.rateInterval(),
