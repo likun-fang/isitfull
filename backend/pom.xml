@@ -19,7 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <mybatis-plus.version>3.5.17</mybatis-plus.version>
+        <mybatis-plus.version>3.5.18.1</mybatis-plus.version>
     </properties>
 
     <dependencies>
@@ -144,12 +144,12 @@
         <dependency>
             <groupId>com.oracle.oci.sdk</groupId>
             <artifactId>oci-java-sdk-objectstorage</artifactId>
-            <version>3.97.2</version>
+            <version>3.100.0</version>
         </dependency>
         <dependency>
             <groupId>com.oracle.oci.sdk</groupId>
             <artifactId>oci-java-sdk-common-httpclient-jersey3</artifactId>
-            <version>3.97.2</version>
+            <version>3.100.0</version>
         </dependency>
     </dependencies>
 
